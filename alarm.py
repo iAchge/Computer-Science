@@ -14,8 +14,8 @@ LED_PIN = 27
 PIN_CODE = "1811"
 
 # Telegram-Konfiguration
-TELEGRAM_BOT_TOKEN = "8295131851:AAEGTotKaTzIvAxqxcNYk90zNOFx12vVNfk"
-TELEGRAM_CHAT_ID = "8428261562"  
+TELEGRAM_BOT_TOKEN = " ***nur im Orginalcode ersichtlich*** "
+TELEGRAM_CHAT_ID = " ***nur im Orginalcode ersichtlich*** "  
 
 # Hardware-Objekte 
 pir = MotionSensor(PIR_PIN)
@@ -289,3 +289,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
