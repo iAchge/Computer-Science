@@ -14,8 +14,8 @@ LED_PIN = 27
 PIN_CODE = "1811"
 
 # Telegram-Konfiguration
-TELEGRAM_BOT_TOKEN = " ***nur im Orginalcode ersichtlich*** "
-TELEGRAM_CHAT_ID = " ***nur im Orginalcode ersichtlich*** "  
+TELEGRAM_BOT_TOKEN = "8295131851:AAEGTotKaTzIvAxqxcNYk90zNOFx12vVNfk"
+TELEGRAM_CHAT_ID = "8428261562"  
 
 # Hardware-Objekte 
 pir = MotionSensor(PIR_PIN)
@@ -31,17 +31,19 @@ last_event = None
 event_log = []
 
 
-# ------------------ Hilfsfunktionen ------------------ #
-
+# Hilfsfunktionen 
 def send_telegram_message(text: str):
-    """Schickt eine Nachricht über das Telegram-Bot-API."""
+    # Schickt eine Nachricht über das Telegram-Bot-API.
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
         print("Telegram nicht konfiguriert, überspringe Nachricht.")
         return
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     try:
-        response = requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": text,})
+        response = requests.post(url, json={
+            "chat_id": TELEGRAM_CHAT_ID,
+            "text": text,
+        })
         if not response.ok:
             print("Telegram-Fehler:", response.text)
     except Exception as e:
@@ -49,7 +51,7 @@ def send_telegram_message(text: str):
 
 
 def log_event(text: str):
-    """Speichert Ereignis mit Zeitstempel und gibt es aus."""
+    # Speichert Ereignis mit Zeitstempel und gibt es aus.
     global last_event, event_log
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     entry = f"[{ts}] {text}"
@@ -70,7 +72,7 @@ def alarm_off():
 
 
 def is_night_window():
-    #"""Gibt True zurück, wenn gerade zwischen 22:30 und 06:00 ist."""
+    # Gibt True zurück, wenn gerade zwischen 22:30 und 06:00 ist.
     now = datetime.now().time()
     start = dtime(22, 30)
     end = dtime(6, 0)
@@ -79,16 +81,17 @@ def is_night_window():
 
 
 def is_system_armed():
-    # """ Effektiver Scharf-Status:
+    # Effektiver Scharf-Status:
     # - Wenn Nachtfenster aktiv und nicht übersteuert → scharf
-    # - Sonst nach manuellem Status """
+    # - Sonst nach manuellem Status
+    
     if is_night_window() and not night_override_off:
         return True
     return manual_armed
 
 
 def monitor_motion():
-    # """Läuft in einem Hintergrundthread und überwacht den PIR."""
+    # Läuft in einem Hintergrundthread und überwacht den PIR.
     global night_override_off
     while True:
         try:
@@ -101,7 +104,7 @@ def monitor_motion():
                 if is_system_armed():
                     log_event("Bewegung erkannt! Alarm ausgelöst.")
                     alarm_on()
-                    send_telegram_message("🚨 Bewegung erkannt! Alarm auf deinem Raspberry Pi!")
+                    send_telegram_message("Bewegung erkannt! Alarm auf deinem Raspberry Pi!")
                     time_module.sleep(5)   # Alarmdauer
                     alarm_off()
                 else:
@@ -113,7 +116,7 @@ def monitor_motion():
             time_module.sleep(1)
 
 
-# ------------------ Weboberfläche (Flask) ------------------ #
+# Weboberfläche (Flask) 
 
 HTML_TEMPLATE = """
 <!doctype html>
@@ -272,7 +275,7 @@ def test_alarm():
 
     log_event("Test-Alarm ausgelöst (Web).")
     alarm_on()
-    send_telegram_message("🔔 Test-Alarm vom Raspberry Pi.")
+    send_telegram_message("Test-Alarm vom Raspberry Pi.")
     time_module.sleep(3)
     alarm_off()
     return redirect(url_for('index'))
@@ -289,4 +292,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
