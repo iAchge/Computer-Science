@@ -10,28 +10,27 @@ PIR_PIN = 17
 BUZZER_PIN = 18
 LED_PIN = 27
 
-# PIN-Code
 PIN_CODE = "1811"
 
 # Telegram-Konfiguration
 TELEGRAM_BOT_TOKEN = "8295131851:AAEGTotKaTzIvAxqxcNYk90zNOFx12vVNfk"
 TELEGRAM_CHAT_ID = "8428261562"  
 
-# Hardware-Objekte 
+# Raspberry-PI Anschlusssensoren
 pir = MotionSensor(PIR_PIN)
 buzzer = Buzzer(BUZZER_PIN)
 led = LED(LED_PIN)
 
 app = Flask(__name__)
 
-# Zustände
+
 manual_armed = False       # manuell scharf/unscharf
 night_override_off = False # Nachtmodus für diese Nacht deaktiviert
 last_event = None
 event_log = []
 
 
-# Hilfsfunktionen 
+ 
 def send_telegram_message(text: str):
     # Schickt eine Nachricht über das Telegram-Bot-API.
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
@@ -70,13 +69,11 @@ def alarm_off():
     buzzer.off()
     led.off()
 
-
+ # Zeitfenster geht über Mitternacht: [22:30, 24:00) U [00:00, 06:00)
 def is_night_window():
-    # Gibt True zurück, wenn gerade zwischen 22:30 und 06:00 ist.
     now = datetime.now().time()
     start = dtime(22, 30)
     end = dtime(6, 0)
-    # Zeitfenster geht über Mitternacht: [22:30, 24:00) U [00:00, 06:00)
     return now >= start or now < end
 
 
@@ -84,7 +81,6 @@ def is_system_armed():
     # Effektiver Scharf-Status:
     # - Wenn Nachtfenster aktiv und nicht übersteuert → scharf
     # - Sonst nach manuellem Status
-    
     if is_night_window() and not night_override_off:
         return True
     return manual_armed
@@ -95,7 +91,7 @@ def monitor_motion():
     global night_override_off
     while True:
         try:
-            # Nacht-Override zurücksetzen, wenn wir nicht mehr im Nachtfenster sind
+            # Nacht-Override zurücksetzen, wenn man nicht mehr im Nachtfenster ist
             if not is_night_window() and night_override_off:
                 night_override_off = False
                 log_event("Nacht-Override zurückgesetzt (neuer Tag).")
@@ -117,7 +113,6 @@ def monitor_motion():
 
 
 # Weboberfläche (Flask) 
-
 HTML_TEMPLATE = """
 <!doctype html>
 <html lang="de">
@@ -259,7 +254,7 @@ def disarm():
     manual_armed = False
     alarm_off()
     if is_night_window():
-        night_override_off = True  # diese Nacht Nachtmodus aus
+        night_override_off = True  # Nacht Nachtmodus aus
         log_event("System entschärft, Nachtmodus für diese Nacht übersteuert (Web).")
     else:
         log_event("System entschärft (Web).")
@@ -292,5 +287,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
